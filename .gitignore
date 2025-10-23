@@ -1,0 +1,19 @@
+# Ignore compiled binaries and common build artifacts
+
+# Executables
+solution
+a.out
+*.exe
+*.out
+
+# Object files
+*.o
+*.obj
+
+# Build directories
+/build/
+/bin/
+
+# IDE / system files
+*.log
+.DS_Store
