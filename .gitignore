@@ -17,3 +17,4 @@ a.out
 # IDE / system files
 *.log
 .DS_Store
+.vscode
