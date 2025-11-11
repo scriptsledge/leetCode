@@ -1,67 +1,117 @@
-
 # 2043. Simple Bank System
 
-Short intuition
-----------------
-A bank system simulation that manages multiple accounts (1-indexed) where the core challenge is to maintain data consistency and handle various banking operations while ensuring proper validation of account indices and sufficient funds.
+## Problem Description
 
-What I reasoned
-----------------
-- Design a robust bank system using a vector to store account balances
-- Handle edge cases through careful validation:
-  - Ensure account indices are within valid range [1, n]
-  - Verify sufficient funds exist for withdrawals/transfers
-  - Maintain atomicity in transfer operations
-- Implement operations with O(1) time complexity using direct array access
+You are tasked with designing a simple bank system. You have to support three types of transactions: `transfer`, `deposit`, and `withdraw`. The bank has `n` accounts, numbered from `1` to `n`. The initial balance of each account is stored in an array `balance`, where `balance[i]` is the initial balance of account `i + 1`.
 
-Algorithm
----------
-1. Initialize bank with an array storing account balances (0-indexed internally)
-2. For each operation:
-   - Validate account numbers are in range [1, n]
-   - For withdrawals/transfers, verify sufficient balance
-   - Update balances atomically
-   - Return success/failure status
+Implement the `Bank` class:
 
-API Methods
-----------
-- `Bank(long[] balance)`: Initialize bank with starting balances
-- `transfer(int account1, int account2, long money)`: Transfer money between accounts
-- `deposit(int account, long money)`: Add money to an account
-- `withdraw(int account, long money)`: Remove money from an account
+*   `Bank(long[] balance)`: Initializes the object with the initial balances.
+*   `boolean transfer(int account1, int account2, long money)`: Transfers `money` from `account1` to `account2`. Returns `true` if the transaction is successful, `false` otherwise.
+*   `boolean deposit(int account, long money)`: Deposits `money` into `account`. Returns `true` if the transaction is successful, `false` otherwise.
+*   `boolean withdraw(int account, long money)`: Withdraws `money` from `account`. Returns `true` if the transaction is successful, `false` otherwise.
 
-Complexity
-----------
-- Time: O(1) for all operations
-- Space: O(n) where n is the number of accounts
+A transaction is successful if:
 
-Examples
---------
-Example 1:
+*   The account numbers are valid (between `1` and `n`).
+*   The amount of money to withdraw or transfer is not more than the account's balance.
+
+### Example 1:
+
+**Input:**
 ```
-Input: 
 ["Bank", "withdraw", "transfer", "deposit", "transfer", "withdraw"]
 [[[10, 100, 20, 50, 30]], [3, 10], [5, 1, 20], [5, 20], [3, 4, 15], [10, 50]]
-
-Output: 
-[null, true, true, true, false, false]
-
-Explanation:
-Bank bank = new Bank([10, 100, 20, 50, 30]);
-bank.withdraw(3, 10);    // true, account 3: $20 → $10
-bank.transfer(5, 1, 20); // true, account 5: $30 → $10, account 1: $10 → $30
-bank.deposit(5, 20);     // true, account 5: $10 → $30
-bank.transfer(3, 4, 15); // false, insufficient funds
-bank.withdraw(10, 50);   // false, invalid account
 ```
 
-Constraints
------------
-- n == balance.length
-- 1 <= n, account, account1, account2 <= 10^5
-- 0 <= balance[i], money <= 10^12
-- At most 10^4 calls will be made to each function transfer, deposit, withdraw
+**Output:**
+```
+[null, true, true, true, false, false]
+```
 
-Solution
---------
-See `solution.cpp` for a straightforward implementation and an example `main()` that runs the sample test case.
+**Explanation:**
+```
+Bank bank = new Bank([10, 100, 20, 50, 30]);
+bank.withdraw(3, 10);    // returns true, account 3's balance is now 10
+bank.transfer(5, 1, 20); // returns true, account 5's balance is now 10, account 1's balance is now 30
+bank.deposit(5, 20);     // returns true, account 5's balance is now 30
+bank.transfer(3, 4, 15); // returns false, account 3 has only 10, so the transfer fails
+bank.withdraw(10, 50);   // returns false, account 10 does not exist
+```
+
+### Constraints:
+
+*   `n == balance.length`
+*   `1 <= n, account, account1, account2 <= 10^5`
+*   `0 <= balance[i], money <= 10^12`
+*   At most `10^4` calls will be made to each function `transfer`, `deposit`, `withdraw`.
+
+## Solution
+
+The solution is implemented in the [`solution.cpp`](./solution.cpp) file.
+
+### Approach
+
+The `Bank` class is designed with a `vector<long long>` to store the balances of the accounts. The core of the implementation is the validation logic within each transaction method.
+
+1.  **Initialization:** The constructor initializes the `balances` vector.
+2.  **Validation:** Each method (`transfer`, `deposit`, `withdraw`) first validates the account numbers to ensure they are within the valid range `[1, n]`.
+3.  **Sufficient Funds Check:** For `transfer` and `withdraw`, the methods check if the account has sufficient funds.
+4.  **Transaction Execution:** If the validation and funds check pass, the balances are updated.
+
+### Code
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class Bank
+{
+private:
+    vector<long long> balances;
+
+public:
+    Bank(vector<long long> &balance) { balances = balance; }
+
+    bool transfer(int account1, int account2, long long money)
+    {
+        if (account1 < 1 || account1 > (int)balances.size() || account2 < 1 ||
+            account2 > (int)balances.size() || balances[account1 - 1] < money)
+        {
+            return false;
+        }
+        else
+        {
+            balances[account1 - 1] -= money;
+            balances[account2 - 1] += money;
+            return true;
+        }
+    }
+
+    bool deposit(int account, long long money)
+    {
+        if (account < 1 || account > (int)balances.size())
+        {
+            return false;
+        }
+        balances[account - 1] += money;
+        return true;
+    }
+
+    bool withdraw(int account, long long money)
+    {
+        if (account < 1 || account > (int)balances.size() ||
+            balances[account - 1] < money)
+        {
+            return false;
+        }
+        else
+        {
+            balances[account - 1] -= money;
+            return true;
+        }
+    }
+};
+```

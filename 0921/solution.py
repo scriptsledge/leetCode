@@ -20,3 +20,9 @@ class Solution:
         
         # Total moves = unmatched opening + unmatched closing brackets needed
         return unmatched_open + unmatched_close
+
+if __name__ == '__main__':
+    solver = Solution()
+    test_cases = ["())", "(((", "()", "()))(("]
+    for s in test_cases:
+        print(f"For s = '{s}', the minimum additions to make it valid is: {solver.minAddToMakeValid(s)}")

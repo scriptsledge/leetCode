@@ -1,56 +1,101 @@
 # 1716. Calculate Money in Leetcode Bank
 
-Short intuition
-----------------
-Hercy deposits money every day. The deposit pattern in a single week (Monday..Sunday) is an arithmetic sequence starting from the week's Monday value. Each new Monday the amount starts one dollar higher than the previous Monday.
+## Problem Description
 
-What I reasoned
-----------------
-- For a full week starting with value x on Monday, the week sum = x + (x+1) + ... + (x+6) = 7*x + 21.
-- If there are fullWeeks = n / 7, the Mondays values are 1, 2, ..., fullWeeks so the contribution is sum_{i=0..fullWeeks-1} (7*(i+1) + 21) which the solution computes compactly.
+Hercy deposits money in a LeetCode bank. He starts by putting in `$1` on Monday, the first day. Every day from Tuesday to Sunday, he will put in `$1` more than the day before. On every subsequent Monday, he will put in `$1` more than the previous Monday.
 
-Algorithm
----------
-1. Compute number of full weeks and remaining days.
-2. Sum each full week using the arithmetic progression formula (or the compact 28 + i*7 used in the solution).
-3. Add the remaining days considering the increase from completed weeks.
+Given `n`, the number of days he will deposit money, return the total amount of money he will have in the bank.
 
-Complexity
-----------
-- Time: O(weeks) = O(n/7) -> effectively O(n) worst-case with small constant.
-- Space: O(1)
+### Example 1:
 
-Examples
---------
-Example 1:
+**Input:** `n = 4`
+**Output:** `10`
+**Explanation:**
+- Day 1 (Monday): $1
+- Day 2 (Tuesday): $2
+- Day 3 (Wednesday): $3
+- Day 4 (Thursday): $4
+Total: `1 + 2 + 3 + 4 = 10`
 
-Input: n = 4
+### Example 2:
 
-Output: 10
+**Input:** `n = 10`
+**Output:** `37`
+**Explanation:**
+- Week 1: `1 + 2 + 3 + 4 + 5 + 6 + 7 = 28`
+- Week 2 (starting Monday): `2 + 3 + 4 = 9`
+Total: `28 + 9 = 37`
 
-Explanation: After the 4th day, the total is 1 + 2 + 3 + 4 = 10.
+### Example 3:
 
-Example 2:
+**Input:** `n = 20`
+**Output:** `96`
+**Explanation:**
+- Week 1: `28`
+- Week 2: `2 + 3 + 4 + 5 + 6 + 7 + 8 = 35`
+- Week 3 (starting Monday): `3 + 4 + 5 + 6 + 7 + 8 = 33`
+Total: `28 + 35 + 33 = 96`
 
-Input: n = 10
+### Constraints:
 
-Output: 37
+*   `1 <= n <= 1000`
 
-Explanation: After the 10th day, the total is (1 + 2 + 3 + 4 + 5 + 6 + 7) + (2 + 3 + 4) = 37.
+## Solution
 
-Example 3:
+The solution is implemented in the [`solution.cpp`](./solution.cpp) file.
 
-Input: n = 20
+### Approach
 
-Output: 96
+The solution calculates the total money based on the number of full weeks and remaining days.
 
-Explanation: After the 20th day, the total is (1 + 2 + 3 + 4 + 5 + 6 + 7) + (2 + 3 + 4 + 5 + 6 + 7 + 8) + (3 + 4 + 5 + 6 + 7 + 8) = 96.
+1.  **Calculate Full Weeks and Remaining Days:**
+    *   `fullWeeks = n / 7`
+    *   `remainingDays = n % 7`
 
-Constraints
------------
+2.  **Calculate Money from Full Weeks:**
+    *   The first week's sum is `1 + 2 + ... + 7 = 28`.
+    *   Each subsequent week, the Monday deposit increases by 1, so the weekly sum increases by 7.
+    *   The sum for `fullWeeks` can be calculated by iterating from `i = 0` to `fullWeeks - 1` and adding `28 + (i * 7)` for each week.
 
-- 1 <= n <= 1000
+3.  **Calculate Money from Remaining Days:**
+    *   The deposit on the first day of the week after the full weeks is `fullWeeks + 1`.
+    *   The remaining days' deposits form an arithmetic progression.
 
-Solution
---------
-See `solution.cpp` for an implementation and a `main()` that runs the examples.
+### Code
+
+```cpp
+#include <iostream>
+#include <vector>
+
+class Solution
+{
+public:
+    int totalMoney(int n)
+    {
+        int amount = 0;
+        int fullWeeks = n / 7;
+        int remainingDays = n % 7;
+        for (int i = 0; i < fullWeeks; i++)
+        {
+            amount += 28 + (i * 7);
+        }
+        for (int i = 0; i < remainingDays; i++)
+        {
+            amount += (i + 1) + fullWeeks;
+        }
+        return amount;
+    }
+};
+
+int main()
+{
+    Solution sol;
+    std::vector<int> tests = {4, 10, 20};
+    for (int n : tests)
+    {
+        std::cout << "Input: n = " << n << "\n";
+        std::cout << "Output: " << sol.totalMoney(n) << "\n\n";
+    }
+    return 0;
+}
+```

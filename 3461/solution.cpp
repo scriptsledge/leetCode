@@ -1,5 +1,7 @@
 #include <string>
 #include <iostream>
+#include <vector>
+
 using namespace std;
 
 class Solution
@@ -7,37 +9,30 @@ class Solution
 public:
     bool hasSameDigits(string s)
     {
-        string oldS = s;
-        int n = oldS.size();
-        int loopOutValue = n;
-        while (loopOutValue != 2)
+        string current_s = s;
+        while (current_s.size() > 2)
         {
-            string newS = "";
-            for (int i = 0; i < n - 1; i++)
+            string next_s = "";
+            for (size_t i = 0; i + 1 < current_s.size(); ++i)
             {
-                char ch = char('0' + (int(oldS[i]) + int(oldS[i + 1])) % 10);
-                newS += ch;
+                int digit1 = current_s[i] - '0';
+                int digit2 = current_s[i+1] - '0';
+                next_s += to_string((digit1 + digit2) % 10);
             }
-            oldS = newS;
-            n = oldS.size();
-            loopOutValue = newS.size();
+            current_s = next_s;
         }
-        if (oldS[0] == oldS[1])
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return current_s.size() == 2 && current_s[0] == current_s[1];
     }
 };
 
 int main()
 {
     Solution sol;
-    string s = "34789";
-    bool result = sol.hasSameDigits(s);
-    cout << (result ? "true" : "false") << '\n';
+    vector<string> test_cases = {"34789", "3902", "11", "123"};
+    for (string s : test_cases)
+    {
+        bool result = sol.hasSameDigits(s);
+        cout << "For s = \"" << s << "\", the result is: " << (result ? "true" : "false") << '\n';
+    }
     return 0;
 }

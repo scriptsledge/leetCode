@@ -1,20 +1,15 @@
-# Ignore compiled binaries and common build artifacts
 
-# Executables
-solution
-a.out
-*.exe
-*.out
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
 
-# Object files
-*.o
-*.obj
+# Gemini
+.gemini/
 
-# Build directories
-/build/
-/bin/
-
-# IDE / system files
-*.log
-.DS_Store
-.vscode
+# Custom
+generate_readme.py

@@ -1,71 +1,90 @@
-Check If Digits Are Equal in String After Operations I
+# 3461. Check If Digits Are Equal in String After Operations
 
-Short intuition
-----------------
-We repeatedly replace the string by the list of pairwise sums (mod 10) of adjacent digits until only two digits remain, then check if those two digits are equal. Each round reduces the length by exactly 1, so the process always finishes.
+## Problem Description
 
-What I reasoned
-----------------
-- Each iteration computes new digits: new[i] = (old[i] + old[i+1]) % 10.
-- After k iterations the string length becomes original_length - k. Stop when length == 2.
-- Implementation detail: treat characters as digits by subtracting '0', then convert back with + '0'.
+You are given a string `s` of digits. You have to perform the following operation on `s` until the length of `s` becomes 2:
 
-Algorithm (straightforward simulation)
--------------------------------------
-1. While s.length() > 2:
-   - build a new string t of length s.length() - 1
-   - for i in [0 .. s.length()-2]: t[i] = char('0' + ((s[i]-'0') + (s[i+1]-'0')) % 10)
-   - set s = move(t)
-2. Return s[0] == s[1]
+*   Replace `s` with a new string where each character at index `i` is `(s[i] - '0' + s[i+1] - '0') % 10`.
 
-Complexity
-----------
-- Time: O(n^2) worst-case because we rebuild the string each round and there are O(n) rounds; with n <= 100 this is fine.
-- Space: O(n) extra for the temporary string per round (can be reused to avoid repeated allocations).
+Return `true` if the final two digits of `s` are equal, and `false` otherwise.
 
-Example
--------
-Input: "3902"
-Rounds:
-- "3902" -> "292" -> "11"
-Return: true
+### Example 1:
 
-What I did wrong (notes from my `solution.cpp`)
------------------------------------------------
-Here are the mistakes I made when I first wrote the solution and how to fix them:
+**Input:** `s = "3902"`
+**Output:** `true`
+**Explanation:**
+1.  `s` becomes `"(3+9)%10 (9+0)%10 (0+2)%10"` which is `"292"`.
+2.  `s` becomes `"(2+9)%10 (9+2)%10"` which is `"11"`.
+The final two digits are equal.
 
-- Casting bytes incorrectly
-  - Wrong: char ch = char((int)oldS[i] + (int)oldS[i+1]) % 10;
-  - Why: that sums ASCII codes (not digits) and the % 10 happens after the cast, producing non-digit characters.
-  - Fix: Convert to numeric digits first: int a = oldS[i] - '0'; int b = oldS[i+1] - '0'; then char ch = char('0' + (a + b) % 10);
+### Example 2:
 
-- Using the wrong loop bound / stale length
-  - Wrong: using a separate variable `n` initialized once before the loop and iterating i < n-1 each round causes out-of-range access after `oldS` shrinks.
-  - Fix: use the current string length in the loop (e.g., for (size_t i = 0; i + 1 < oldS.size(); ++i)).
+**Input:** `s = "123"`
+**Output:** `false`
+**Explanation:**
+1. `s` becomes `"(1+2)%10 (2+3)%10"` which is `"35"`.
+The final two digits are not equal.
 
-- Frequent reallocations (minor)
-  - Wrong: creating new temporary strings repeatedly with concatenation (newS += ch) is fine here but can be optimized.
-  - Fix: reserve or construct with size: string t; t.reserve(oldS.size()-1); or string t(oldS.size()-1, '?') and fill by index.
+### Constraints:
 
-Small corrected snippet (for reference)
-------------------------------------
+*   `2 <= s.length <= 100`
+*   `s` consists of digits from '0' to '9'.
+
+## Solution
+
+The solution is implemented in the [`solution.cpp`](./solution.cpp) file.
+
+### Approach
+
+The solution simulates the process described in the problem. It repeatedly generates a new string by taking the pairwise sum of adjacent digits modulo 10 until the string length is 2.
+
+1.  Start with the initial string `s`.
+2.  While the length of the current string is greater than 2:
+    *   Create a new empty string `next_s`.
+    *   Iterate through the current string from the first to the second-to-last character.
+    *   For each pair of adjacent characters, convert them to integers, sum them, take the result modulo 10, and append it to `next_s`.
+    *   Replace the current string with `next_s`.
+3.  After the loop, the string length will be 2. Check if the two characters are equal and return the result.
+
+### Code
 
 ```cpp
-bool hasSameDigits(std::string s) {
-    while (s.size() > 2) {
-        std::string t;
-        t.reserve(s.size()-1);
-        for (size_t i = 0; i + 1 < s.size(); ++i) {
-            int a = s[i] - '0';
-            int b = s[i+1] - '0';
-            t.push_back(char('0' + (a + b) % 10));
+#include <string>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class Solution
+{
+public:
+    bool hasSameDigits(string s)
+    {
+        string current_s = s;
+        while (current_s.size() > 2)
+        {
+            string next_s = "";
+            for (size_t i = 0; i + 1 < current_s.size(); ++i)
+            {
+                int digit1 = current_s[i] - '0';
+                int digit2 = current_s[i+1] - '0';
+                next_s += to_string((digit1 + digit2) % 10);
+            }
+            current_s = next_s;
         }
-        s = std::move(t);
+        return current_s.size() == 2 && current_s[0] == current_s[1];
     }
-    return s.size() == 2 && s[0] == s[1];
+};
+
+int main()
+{
+    Solution sol;
+    vector<string> test_cases = {"34789", "3902", "11", "123"};
+    for (string s : test_cases)
+    {
+        bool result = sol.hasSameDigits(s);
+        cout << "For s = \"" << s << "\", the result is: " << (result ? "true" : "false") << '\n';
+    }
+    return 0;
 }
 ```
-
-Summary
--------
-The approach is a simple simulation. The main pitfalls are mixing ASCII codes with numeric values and using stale lengths/indices after mutating the string. With the fixes above the implementation is clear and robust.
